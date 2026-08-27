@@ -52,11 +52,6 @@ jobs:
           storeFile=../app/upload-keystore.jks
           EOF
 
-      - name: Restore Firebase config
-        shell: bash
-        run: |
-          echo "${{ secrets.GOOGLE_SERVICES_JSON_BASE64 }}" | base64 --decode > android/app/google-services.json
-
       - name: Show Flutter version
         run: flutter --version
 
