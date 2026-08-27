@@ -29,14 +29,26 @@ jobs:
       - name: Restore Android signing files
         shell: bash
         env:
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
           ANDROID_KEYSTORE_TYPE: ${{ secrets.ANDROID_KEYSTORE_TYPE }}
         run: |
           echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 --decode > android/app/upload-keystore.jks
+          KEYSTORE_TYPE="${ANDROID_KEYSTORE_TYPE}"
+          if [ -z "$KEYSTORE_TYPE" ]; then
+            if keytool -list -keystore android/app/upload-keystore.jks -storepass "$ANDROID_KEYSTORE_PASSWORD" -storetype pkcs12 >/dev/null 2>&1; then
+              KEYSTORE_TYPE=pkcs12
+            elif keytool -list -keystore android/app/upload-keystore.jks -storepass "$ANDROID_KEYSTORE_PASSWORD" -storetype jks >/dev/null 2>&1; then
+              KEYSTORE_TYPE=jks
+            else
+              echo "Unable to detect the keystore type. Please verify ANDROID_KEYSTORE_BASE64 and ANDROID_KEYSTORE_PASSWORD." >&2
+              exit 1
+            fi
+          fi
           cat <<EOF > android/key.properties
           storePassword=${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
           keyPassword=${{ secrets.ANDROID_KEY_PASSWORD }}
           keyAlias=${{ secrets.ANDROID_KEY_ALIAS }}
-          storeType=${ANDROID_KEYSTORE_TYPE:-pkcs12}
+          storeType=${KEYSTORE_TYPE}
           storeFile=../app/upload-keystore.jks
           EOF
 
