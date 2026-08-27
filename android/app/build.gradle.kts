@@ -35,6 +35,7 @@ android {
             val storeFilePath = keyProperties["storeFile"]?.toString()
             if (!storeFilePath.isNullOrBlank()) {
                 storeFile = file(storeFilePath)
+                storeType = keyProperties["storeType"]?.toString() ?: "pkcs12"
                 storePassword = keyProperties["storePassword"]?.toString()
                 keyAlias = keyProperties["keyAlias"]?.toString()
                 keyPassword = keyProperties["keyPassword"]?.toString()
