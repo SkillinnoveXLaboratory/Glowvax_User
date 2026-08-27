@@ -3,14 +3,14 @@ import 'package:flutter/material.dart';
 class AppColors {
   AppColors._();
 
-  static const Color primary = Color(0xFFFF4DBD);
-  static const Color primaryDark = Color(0xFF7A3DB8);
-  static const Color primaryLight = Color(0xFFFF88D3);
-  static const Color secondary = Color(0xFF7A3DB8);
+  static const Color primary = Color(0xFF7A3DB8);
+  static const Color primaryDark = Color(0xFF5B248F);
+  static const Color primaryLight = Color(0xFFB493E1);
+  static const Color secondary = Color(0xFF9A72CE);
   static const Color accent = Color(0xFFD4AF37);
   static const Color gold = Color(0xFFD4AF37);
   static const Color goldLight = Color(0xFFFFF1C2);
-  static const Color rose = Color(0xFFFF4DBD);
+  static const Color rose = Color(0xFF7A3DB8);
   static const Color rating = Color(0xFFD4AF37);
 
   static const Color success = Color(0xFF1FA971);
@@ -69,7 +69,7 @@ class AppColors {
   static LinearGradient heroGradientOf(BuildContext context) => LinearGradient(
     colors: isDark(context)
         ? const [Color(0xFF241533), Color(0xFF110A1A)]
-        : const [Color(0xFFFFE7F5), Color(0xFFFFF9FC)],
+        : const [Color(0xFFF1E9FB), Color(0xFFFCFAFE)],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
@@ -83,16 +83,12 @@ class AppColors {
   );
 
   static const LinearGradient brandGradient = LinearGradient(
-    colors: [Color(0xFFFF4DBD), Color(0xFFB34AE3), Color(0xFF7A3DB8)],
+    colors: [Color(0xFFB493E1), Color(0xFF9A72CE), Color(0xFF7A3DB8)],
     begin: Alignment.centerLeft,
     end: Alignment.centerRight,
   );
 
-  static const LinearGradient buttonGradient = LinearGradient(
-    colors: [Color(0xFFFF4DBD), Color(0xFFB34AE3), Color(0xFF7A3DB8)],
-    begin: Alignment.topLeft,
-    end: Alignment.bottomRight,
-  );
+  static const LinearGradient buttonGradient = goldGradient;
 
   static const LinearGradient goldGradient = LinearGradient(
     colors: [Color(0xFFFFE7A0), Color(0xFFD4AF37), Color(0xFFB58A1B)],
@@ -102,11 +98,14 @@ class AppColors {
 
   static const LinearGradient primaryGradient = brandGradient;
 
-  static const LinearGradient navActiveGradient = LinearGradient(
-    colors: [Color(0xFFFFD5ED), Color(0xFFFFEEF8)],
-    begin: Alignment.centerLeft,
-    end: Alignment.centerRight,
-  );
+  static LinearGradient navActiveGradientOf(BuildContext context) =>
+      LinearGradient(
+        colors: isDark(context)
+            ? const [Color(0xFF2A2038), Color(0xFF1E172B)]
+            : const [Color(0xFFE9DDF8), Color(0xFFF5EFFD)],
+        begin: Alignment.centerLeft,
+        end: Alignment.centerRight,
+      );
 
   static LinearGradient bannerOverlayOf(BuildContext context) => LinearGradient(
     colors: isDark(context)

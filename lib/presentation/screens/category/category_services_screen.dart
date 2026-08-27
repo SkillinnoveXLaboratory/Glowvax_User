@@ -78,24 +78,6 @@ class _CategoryServicesScreenState extends State<CategoryServicesScreen> {
                   child: Column(
                     children: [
                       Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: AppColors.surfaceOf(context),
-                          borderRadius: BorderRadius.circular(18),
-                          border: Border.all(
-                            color: AppColors.cardBorderOf(context),
-                          ),
-                        ),
-                        child: Text(
-                          category.description,
-                          style: AppTextStyles.bodyMedium.copyWith(
-                            color: AppColors.textSecondaryOf(context),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 14),
-                      Container(
                         decoration: AppDecorations.searchBar(context),
                         child: AppTextField(
                           controller: _searchController,

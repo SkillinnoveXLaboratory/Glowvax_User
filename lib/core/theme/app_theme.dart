@@ -116,8 +116,8 @@ class AppTheme {
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.primary,
-          foregroundColor: AppColors.textOnPrimary,
+          backgroundColor: AppColors.gold,
+          foregroundColor: AppColors.textOnGold,
           elevation: 0,
           shadowColor: Colors.transparent,
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
@@ -125,15 +125,15 @@ class AppTheme {
             borderRadius: BorderRadius.circular(AppDecorations.buttonRadius),
           ),
           textStyle: AppTextStyles.labelLarge.copyWith(
-            color: AppColors.textOnPrimary,
+            color: AppColors.textOnGold,
           ),
         ),
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
-          foregroundColor: AppColors.primary,
+          foregroundColor: AppColors.gold,
           side: BorderSide(
-            color: AppColors.primary.withValues(alpha: 0.75),
+            color: AppColors.gold.withValues(alpha: 0.75),
             width: 1.4,
           ),
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
@@ -141,15 +141,15 @@ class AppTheme {
             borderRadius: BorderRadius.circular(AppDecorations.buttonRadius),
           ),
           textStyle: AppTextStyles.labelLarge.copyWith(
-            color: AppColors.primary,
+            color: AppColors.gold,
           ),
         ),
       ),
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
-          foregroundColor: AppColors.primary,
+          foregroundColor: AppColors.gold,
           textStyle: AppTextStyles.titleMedium.copyWith(
-            color: AppColors.primary,
+            color: AppColors.gold,
           ),
         ),
       ),
@@ -203,7 +203,7 @@ class AppTheme {
         dividerColor: outline.withValues(alpha: 0.65),
         cancelButtonStyle: TextButton.styleFrom(foregroundColor: onSurfaceMuted),
         confirmButtonStyle: TextButton.styleFrom(
-          foregroundColor: AppColors.primary,
+          foregroundColor: AppColors.gold,
         ),
       ),
       chipTheme: ChipThemeData(
@@ -228,8 +228,8 @@ class AppTheme {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
       ),
       floatingActionButtonTheme: const FloatingActionButtonThemeData(
-        backgroundColor: AppColors.primary,
-        foregroundColor: AppColors.textOnPrimary,
+        backgroundColor: AppColors.gold,
+        foregroundColor: AppColors.textOnGold,
       ),
       dividerTheme: DividerThemeData(color: outline.withValues(alpha: 0.65)),
       iconTheme: IconThemeData(color: onSurface),

@@ -29,8 +29,8 @@ class AppDecorations {
 
   static List<BoxShadow> buttonShadow(BuildContext context) => [
     BoxShadow(
-      color: AppColors.primary.withValues(
-        alpha: AppColors.isDark(context) ? 0.28 : 0.22,
+      color: AppColors.gold.withValues(
+        alpha: AppColors.isDark(context) ? 0.24 : 0.2,
       ),
       blurRadius: 18,
       offset: const Offset(0, 8),

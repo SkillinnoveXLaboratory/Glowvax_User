@@ -48,7 +48,9 @@ class PremiumBottomNav extends StatelessWidget {
                       horizontal: 8,
                     ),
                     decoration: BoxDecoration(
-                      gradient: selected ? AppColors.navActiveGradient : null,
+                      gradient: selected
+                          ? AppColors.navActiveGradientOf(context)
+                          : null,
                       color: selected ? null : Colors.transparent,
                       borderRadius: BorderRadius.circular(18),
                       border: Border.all(

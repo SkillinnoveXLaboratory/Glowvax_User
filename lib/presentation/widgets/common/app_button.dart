@@ -29,7 +29,7 @@ class AppButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final disabled = onPressed == null || isLoading;
-    final outlineColor = AppColors.primary.withValues(
+    final outlineColor = AppColors.gold.withValues(
       alpha: disabled ? 0.4 : 0.85,
     );
     final fillColor = AppColors.surfaceElevatedOf(context);
@@ -39,7 +39,7 @@ class AppButton extends StatelessWidget {
             width: 22,
             child: CircularProgressIndicator(
               strokeWidth: 2.5,
-              color: isOutlined ? AppColors.primary : AppColors.textOnPrimary,
+              color: isOutlined ? AppColors.gold : AppColors.textOnGold,
             ),
           )
         : Row(
@@ -51,8 +51,8 @@ class AppButton extends StatelessWidget {
                   icon,
                   size: 20,
                   color: isOutlined
-                      ? AppColors.primary
-                      : AppColors.textOnPrimary,
+                      ? AppColors.gold
+                      : AppColors.textOnGold,
                 ),
                 const SizedBox(width: 8),
               ],
@@ -62,8 +62,8 @@ class AppButton extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                   style: AppTextStyles.labelLarge.copyWith(
                     color: isOutlined
-                        ? AppColors.primary
-                        : AppColors.textOnPrimary,
+                        ? AppColors.gold
+                        : AppColors.textOnGold,
                   ),
                 ),
               ),
@@ -77,7 +77,7 @@ class AppButton extends StatelessWidget {
         child: OutlinedButton(
           onPressed: disabled ? null : () => _handleTap(),
           style: OutlinedButton.styleFrom(
-            foregroundColor: AppColors.primary,
+            foregroundColor: AppColors.gold,
             side: BorderSide(color: outlineColor, width: 1.4),
             backgroundColor: Colors.transparent,
             shape: RoundedRectangleBorder(
