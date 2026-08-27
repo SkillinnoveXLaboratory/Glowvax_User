@@ -15,18 +15,45 @@ class AppTheme {
 
   static ThemeData _build(Brightness brightness) {
     final isDark = brightness == Brightness.dark;
-    final scaffold = isDark ? const Color(0xFF120E18) : const Color(0xFFFFFAFD);
+    final scaffold = isDark ? const Color(0xFF120E18) : const Color(0xFFFFFFFF);
     final surface = isDark ? const Color(0xFF1E1728) : const Color(0xFFFFFFFF);
     final surfaceContainer = isDark
         ? const Color(0xFF281F34)
-        : const Color(0xFFF8F3F8);
-    final outline = isDark ? const Color(0xFF493657) : const Color(0xFFE9D7E6);
+        : const Color(0xFFF7F7FA);
+    final outline = isDark ? const Color(0xFF493657) : const Color(0xFFE7E8EE);
     final onSurface = isDark
         ? const Color(0xFFFFFFFF)
         : const Color(0xFF201827);
     final onSurfaceMuted = isDark
         ? const Color(0xFFC4B7CF)
         : const Color(0xFF6E5D75);
+    final dayForeground = WidgetStateProperty.resolveWith<Color?>((states) {
+      if (states.contains(WidgetState.disabled)) {
+        return onSurfaceMuted.withValues(alpha: 0.45);
+      }
+      if (states.contains(WidgetState.selected)) {
+        return Colors.white;
+      }
+      return onSurface;
+    });
+    final dayBackground = WidgetStateProperty.resolveWith<Color?>((states) {
+      if (states.contains(WidgetState.selected)) {
+        return AppColors.primary;
+      }
+      return Colors.transparent;
+    });
+    final yearForeground = WidgetStateProperty.resolveWith<Color?>((states) {
+      if (states.contains(WidgetState.selected)) {
+        return Colors.white;
+      }
+      return onSurface;
+    });
+    final yearBackground = WidgetStateProperty.resolveWith<Color?>((states) {
+      if (states.contains(WidgetState.selected)) {
+        return AppColors.primary;
+      }
+      return Colors.transparent;
+    });
 
     final colorScheme = ColorScheme(
       brightness: brightness,
@@ -155,6 +182,29 @@ class AppTheme {
         modalBackgroundColor: surface,
         shape: AppDecorations.bottomSheetShape(),
         showDragHandle: false,
+      ),
+      datePickerTheme: DatePickerThemeData(
+        backgroundColor: surface,
+        surfaceTintColor: Colors.transparent,
+        headerBackgroundColor: AppColors.primary,
+        headerForegroundColor: Colors.white,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(28),
+        ),
+        dayForegroundColor: dayForeground,
+        dayBackgroundColor: dayBackground,
+        todayForegroundColor: WidgetStatePropertyAll(AppColors.primary),
+        todayBackgroundColor: const WidgetStatePropertyAll(Colors.transparent),
+        todayBorder: BorderSide(
+          color: AppColors.primary.withValues(alpha: 0.65),
+        ),
+        yearForegroundColor: yearForeground,
+        yearBackgroundColor: yearBackground,
+        dividerColor: outline.withValues(alpha: 0.65),
+        cancelButtonStyle: TextButton.styleFrom(foregroundColor: onSurfaceMuted),
+        confirmButtonStyle: TextButton.styleFrom(
+          foregroundColor: AppColors.primary,
+        ),
       ),
       chipTheme: ChipThemeData(
         backgroundColor: surfaceContainer,

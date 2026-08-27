@@ -5,6 +5,8 @@ import '../../../core/theme/app_decorations.dart';
 import '../../../core/theme/app_text_styles.dart';
 
 class PremiumBottomNav extends StatelessWidget {
+  static const _activeTabColor = Color(0xFF7A3DB8);
+
   final int currentIndex;
   final ValueChanged<int> onTap;
   final List<PremiumNavItem> items;
@@ -28,7 +30,7 @@ class PremiumBottomNav extends StatelessWidget {
           final item = items[index];
           final selected = currentIndex == index;
           final labelColor = selected
-              ? AppColors.primary
+              ? _activeTabColor
               : AppColors.textSecondaryOf(context);
 
           return Expanded(
@@ -51,7 +53,7 @@ class PremiumBottomNav extends StatelessWidget {
                       borderRadius: BorderRadius.circular(18),
                       border: Border.all(
                         color: selected
-                            ? AppColors.primary.withValues(alpha: 0.28)
+                            ? _activeTabColor.withValues(alpha: 0.28)
                             : Colors.transparent,
                       ),
                     ),

@@ -84,6 +84,12 @@ class ApiMappers {
       partnerId: partnerJson is Map
           ? partnerJson['_id']?.toString()
           : json['partnerId']?.toString(),
+      categoryId: catJson is Map
+          ? catJson['_id']?.toString() ?? catJson['id']?.toString()
+          : null,
+      categoryName: catJson is Map
+          ? catJson['name']?.toString() ?? catJson['slug']?.toString()
+          : null,
       name: json['name']?.toString() ?? 'Service',
       description: (json['tags'] as List?)?.join(', ') ?? '',
       category: category,
@@ -123,6 +129,8 @@ class ApiMappers {
     return ServiceModel(
       id: json['_id']?.toString() ?? '',
       partnerId: json['_id']?.toString(),
+      categoryId: firstCat?['_id']?.toString() ?? firstCat?['id']?.toString(),
+      categoryName: firstCat?['name']?.toString() ?? slug,
       name: json['businessName']?.toString() ?? 'Partner',
       description:
           json['description']?.toString() ?? address?['city']?.toString() ?? '',

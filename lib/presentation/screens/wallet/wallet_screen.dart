@@ -66,6 +66,16 @@ class _WalletScreenState extends State<WalletScreen> {
   @override
   Widget build(BuildContext context) {
     final wallet = context.watch<WalletProvider>();
+    final isDark = AppColors.isDark(context);
+    final heroTitleColor = isDark
+        ? AppColors.textOnDark
+        : AppColors.textPrimaryOf(context);
+    final heroSubtitleColor = isDark
+        ? AppColors.textOnDark.withValues(alpha: 0.78)
+        : AppColors.textSecondaryOf(context);
+    final heroLabelColor = isDark
+        ? AppColors.textOnDark.withValues(alpha: 0.72)
+        : AppColors.textSecondaryOf(context);
 
     return Scaffold(
       appBar: AppBar(title: const Text(AppStrings.wallet)),
@@ -87,16 +97,14 @@ class _WalletScreenState extends State<WalletScreen> {
                           Text(
                             AppStrings.walletBalance,
                             style: AppTextStyles.bodyMedium.copyWith(
-                              color: AppColors.textOnDark.withValues(
-                                alpha: 0.72,
-                              ),
+                              color: heroLabelColor,
                             ),
                           ),
                           const SizedBox(height: 8),
                           Text(
                             Formatters.currency(wallet.balance),
                             style: AppTextStyles.displayLarge.copyWith(
-                              color: AppColors.textOnDark,
+                              color: heroTitleColor,
                               fontSize: 36,
                             ),
                           ),
@@ -104,9 +112,7 @@ class _WalletScreenState extends State<WalletScreen> {
                           Text(
                             'Top up securely and use wallet balance during checkout.',
                             style: AppTextStyles.bodySmall.copyWith(
-                              color: AppColors.textOnDark.withValues(
-                                alpha: 0.78,
-                              ),
+                              color: heroSubtitleColor,
                             ),
                           ),
                           const SizedBox(height: 20),

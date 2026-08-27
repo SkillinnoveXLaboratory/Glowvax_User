@@ -10,7 +10,6 @@ import '../../../core/theme/app_text_styles.dart';
 import '../../../core/theme/app_decorations.dart';
 import '../../../core/routes/app_routes.dart';
 import '../../../core/storage/token_storage.dart';
-import '../../../core/utils/app_icons.dart';
 import '../../providers/auth_provider.dart';
 import '../../widgets/common/gradient_text.dart';
 
@@ -108,17 +107,20 @@ class _SplashScreenState extends State<SplashScreen>
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Container(
-                    width: 100,
-                    height: 100,
+                    width: 120,
+                    height: 120,
+                    padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      gradient: AppColors.goldGradient,
-                      borderRadius: BorderRadius.circular(28),
-                      boxShadow: AppDecorations.buttonShadow(context),
+                      color: AppColors.surfaceOf(context),
+                      borderRadius: BorderRadius.circular(30),
+                      border: Border.all(
+                        color: AppColors.cardBorderOf(context),
+                      ),
+                      boxShadow: AppDecorations.cardShadow(context),
                     ),
-                    child: const Icon(
-                      AppIcons.brand,
-                      size: 48,
-                      color: AppColors.textOnGold,
+                    child: Image.asset(
+                      'assest/logo.png',
+                      fit: BoxFit.contain,
                     ),
                   ),
                   const SizedBox(height: 28),

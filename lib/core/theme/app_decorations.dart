@@ -13,7 +13,7 @@ class AppDecorations {
     BoxShadow(
       color: AppColors.isDark(context)
           ? Colors.black.withValues(alpha: 0.22)
-          : const Color(0xFFEFCFE2).withValues(alpha: 0.45),
+          : const Color(0xFFCCD2E0).withValues(alpha: 0.28),
       blurRadius: 20,
       offset: const Offset(0, 10),
     ),

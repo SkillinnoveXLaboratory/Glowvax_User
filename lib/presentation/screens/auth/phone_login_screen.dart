@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import '../../../core/constants/app_strings.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_decorations.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/routes/app_routes.dart';
 import '../../../core/utils/validators.dart';
@@ -13,7 +14,6 @@ import '../../widgets/common/app_button.dart';
 import '../../widgets/common/premium_card.dart';
 import '../../widgets/common/premium_background.dart';
 import '../../widgets/common/gradient_text.dart';
-import '../../../core/utils/app_icons.dart';
 
 class PhoneLoginScreen extends StatefulWidget {
   const PhoneLoginScreen({super.key});
@@ -68,16 +68,22 @@ class _PhoneLoginScreenState extends State<PhoneLoginScreen> {
                     child: Column(
                       children: [
                         Container(
-                          width: 80,
-                          height: 80,
+                          width: 96,
+                          height: 96,
+                          padding: const EdgeInsets.all(14),
                           decoration: BoxDecoration(
-                            gradient: AppColors.goldGradient,
-                            borderRadius: BorderRadius.circular(22),
+                            color: AppColors.surfaceOf(context),
+                            borderRadius: BorderRadius.circular(24),
+                            border: Border.all(
+                              color: AppColors.cardBorderOf(context),
+                            ),
+                            boxShadow: [
+                              ...AppDecorations.cardShadow(context),
+                            ],
                           ),
-                          child: const Icon(
-                            AppIcons.brand,
-                            size: 40,
-                            color: AppColors.textOnGold,
+                          child: Image.asset(
+                            'assest/logo.png',
+                            fit: BoxFit.contain,
                           ),
                         ),
                         const SizedBox(height: 20),

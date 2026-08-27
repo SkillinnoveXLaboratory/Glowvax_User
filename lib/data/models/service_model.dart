@@ -28,6 +28,8 @@ class ServicePackageModel {
 class ServiceModel {
   final String id;
   final String? partnerId;
+  final String? categoryId;
+  final String? categoryName;
   final String name;
   final String description;
   final ServiceCategoryType category;
@@ -43,6 +45,8 @@ class ServiceModel {
   const ServiceModel({
     required this.id,
     this.partnerId,
+    this.categoryId,
+    this.categoryName,
     required this.name,
     required this.description,
     required this.category,

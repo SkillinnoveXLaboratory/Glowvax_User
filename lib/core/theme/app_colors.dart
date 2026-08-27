@@ -35,19 +35,19 @@ class AppColors {
       Theme.of(context).brightness == Brightness.dark;
 
   static Color backgroundOf(BuildContext context) =>
-      isDark(context) ? const Color(0xFF120E18) : const Color(0xFFFFFAFD);
+      isDark(context) ? const Color(0xFF120E18) : const Color(0xFFFFFFFF);
 
   static Color backgroundTintOf(BuildContext context) =>
-      isDark(context) ? const Color(0xFF1A1322) : const Color(0xFFFFF1F8);
+      isDark(context) ? const Color(0xFF1A1322) : const Color(0xFFFAFAFC);
 
   static Color surfaceOf(BuildContext context) =>
       isDark(context) ? const Color(0xFF1E1728) : const Color(0xFFFFFFFF);
 
   static Color surfaceElevatedOf(BuildContext context) =>
-      isDark(context) ? const Color(0xFF281F34) : const Color(0xFFF8F3F8);
+      isDark(context) ? const Color(0xFF281F34) : const Color(0xFFF7F7FA);
 
   static Color cardBorderOf(BuildContext context) =>
-      isDark(context) ? const Color(0xFF493657) : const Color(0xFFE9D7E6);
+      isDark(context) ? const Color(0xFF493657) : const Color(0xFFE7E8EE);
 
   static Color textPrimaryOf(BuildContext context) =>
       isDark(context) ? const Color(0xFFFFFFFF) : const Color(0xFF201827);
@@ -61,7 +61,7 @@ class AppColors {
   static LinearGradient pageGradientOf(BuildContext context) => LinearGradient(
     colors: isDark(context)
         ? const [Color(0xFF120E18), Color(0xFF1A1322), Color(0xFF120E18)]
-        : const [Color(0xFFFFFAFD), Color(0xFFFFF1F8), Color(0xFFFFFAFD)],
+        : const [Color(0xFFFFFFFF), Color(0xFFFCFCFD), Color(0xFFFFFFFF)],
     begin: Alignment.topCenter,
     end: Alignment.bottomCenter,
   );
@@ -77,7 +77,7 @@ class AppColors {
   static LinearGradient cardGradientOf(BuildContext context) => LinearGradient(
     colors: isDark(context)
         ? const [Color(0xFF241B31), Color(0xFF1A1322)]
-        : const [Color(0xFFFFFFFF), Color(0xFFFFF4FA)],
+        : const [Color(0xFFFFFFFF), Color(0xFFF8F9FC)],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );

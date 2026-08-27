@@ -425,7 +425,13 @@ class _TimeStep extends StatelessWidget {
             spacing: 10,
             runSpacing: 10,
             children: slots.map((slot) {
-              final isSelected = selected?.id == slot.id;
+              final isSelected =
+                  selected != null &&
+                  selected!.time.year == slot.time.year &&
+                  selected!.time.month == slot.time.month &&
+                  selected!.time.day == slot.time.day &&
+                  selected!.time.hour == slot.time.hour &&
+                  selected!.time.minute == slot.time.minute;
               final disabled = !slot.isAvailable;
               return GestureDetector(
                 onTap: disabled ? null : () => onSelect(slot),

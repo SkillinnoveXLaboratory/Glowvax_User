@@ -43,12 +43,14 @@ class SearchProvider extends ChangeNotifier {
           .timeout(_searchTimeout, onTimeout: () => <ServiceModel>[]);
       if (seq != _searchSeq) return;
 
-      _results = results;
+      _results = trimmed.isEmpty
+          ? _dedupe(results)
+          : filterLocally(results, trimmed);
       _hasLoaded = true;
-      if (results.isEmpty && trimmed.isNotEmpty) {
+      if (_results.isEmpty && trimmed.isNotEmpty) {
         _error = null;
       }
-      AppLogger.success('SearchProvider: ${results.length} results');
+      AppLogger.success('SearchProvider: ${_results.length} results');
     } catch (e) {
       if (seq != _searchSeq) return;
       _error = e is ApiException ? e.message : e.toString();
@@ -63,13 +65,129 @@ class SearchProvider extends ChangeNotifier {
   }
 
   Future<List<ServiceModel>> getByCategory(ServiceCategoryType category) async {
+    final categoryModel = CategoryModel(
+      id: category.name,
+      name: category.label,
+      type: category,
+      description: '',
+      serviceCount: 0,
+      colorHex: '',
+    );
+    return getByCategoryModel(categoryModel);
+  }
+
+  Future<List<ServiceModel>> getByCategoryModel(CategoryModel category) async {
     AppLogger.state(
       'SearchProvider',
       'getByCategory',
-      data: {'category': category.label},
+      data: {'category': category.name},
     );
-    return _repository
-        .getServicesByCategory(category)
-        .timeout(_searchTimeout, onTimeout: () => <ServiceModel>[]);
+    try {
+      final typedResults = await _repository
+          .getServicesByCategory(category.type)
+          .timeout(_searchTimeout, onTimeout: () => <ServiceModel>[]);
+      final refinedTyped = filterCategoryResults(typedResults, category);
+      if (refinedTyped.isNotEmpty) return refinedTyped;
+
+      final searchedResults = await _repository
+          .searchServices(category.name)
+          .timeout(_searchTimeout, onTimeout: () => <ServiceModel>[]);
+      final refinedSearch = filterCategoryResults(searchedResults, category);
+      if (refinedSearch.isNotEmpty) return refinedSearch;
+
+      return filterLocally(searchedResults, category.name);
+    } catch (e) {
+      AppLogger.error('Category load failed', e);
+      rethrow;
+    }
+  }
+
+  List<ServiceModel> filterLocally(List<ServiceModel> services, String query) {
+    final trimmed = query.trim();
+    if (trimmed.isEmpty) return _dedupe(services);
+    return _dedupe(services.where((service) => _matchesQuery(service, trimmed)));
+  }
+
+  List<ServiceModel> filterCategoryResults(
+    List<ServiceModel> services,
+    CategoryModel category,
+  ) {
+    return _dedupe(
+      services.where((service) => _matchesCategory(service, category)),
+    );
+  }
+
+  List<ServiceModel> _dedupe(Iterable<ServiceModel> services) {
+    final seen = <String>{};
+    final results = <ServiceModel>[];
+    for (final service in services) {
+      if (seen.add(service.id)) {
+        results.add(service);
+      }
+    }
+    return results;
+  }
+
+  bool _matchesQuery(ServiceModel service, String query) {
+    final haystack = _searchText(service);
+    final terms = query
+        .toLowerCase()
+        .split(RegExp(r'\s+'))
+        .where((term) => term.isNotEmpty);
+    return terms.every(haystack.contains);
+  }
+
+  bool _matchesCategory(ServiceModel service, CategoryModel category) {
+    final requestedId = category.id.trim().toLowerCase();
+    final requestedName = category.name.trim().toLowerCase();
+    final requestedLabel = category.type.label.trim().toLowerCase();
+    final serviceCategoryId = service.categoryId?.trim().toLowerCase() ?? '';
+    final serviceCategoryName =
+        service.categoryName?.trim().toLowerCase() ?? '';
+    final tagSet = service.tags
+        .map((tag) => tag.trim().toLowerCase())
+        .where((tag) => tag.isNotEmpty)
+        .toSet();
+
+    if (requestedId.isNotEmpty &&
+        serviceCategoryId.isNotEmpty &&
+        requestedId == serviceCategoryId) {
+      return true;
+    }
+
+    if (serviceCategoryName.isNotEmpty) {
+      if (serviceCategoryName == requestedName ||
+          serviceCategoryName == requestedLabel) {
+        return true;
+      }
+      if (serviceCategoryName.contains(requestedName) ||
+          requestedName.contains(serviceCategoryName)) {
+        return true;
+      }
+    }
+
+    if (tagSet.contains(requestedName) || tagSet.contains(requestedLabel)) {
+      return true;
+    }
+
+    final hasExplicitCategoryMeta =
+        serviceCategoryId.isNotEmpty ||
+        serviceCategoryName.isNotEmpty ||
+        tagSet.isNotEmpty;
+    if (hasExplicitCategoryMeta) {
+      return false;
+    }
+
+    return service.category == category.type;
+  }
+
+  String _searchText(ServiceModel service) {
+    return [
+      service.name,
+      service.description,
+      service.categoryName,
+      service.category.label,
+      ...service.tags,
+    ].whereType<String>().join(' ').toLowerCase();
   }
 }
