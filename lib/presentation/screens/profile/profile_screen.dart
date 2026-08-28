@@ -16,6 +16,17 @@ import '../../widgets/common/app_button.dart';
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
 
+  String _themeLabel(ThemeMode mode) {
+    switch (mode) {
+      case ThemeMode.system:
+        return 'Device Default';
+      case ThemeMode.light:
+        return 'Light Mode';
+      case ThemeMode.dark:
+        return 'Dark Mode';
+    }
+  }
+
   Future<void> _showThemeSheet(BuildContext context) async {
     final theme = context.read<ThemeProvider>();
     final selected = await showModalBottomSheet<ThemeMode>(
@@ -27,9 +38,9 @@ class ProfileScreen extends StatelessWidget {
       builder: (sheetContext) {
         final currentMode = sheetContext.watch<ThemeProvider>().mode;
         final options = <MapEntry<ThemeMode, String>>[
-          const MapEntry(ThemeMode.system, 'Match device'),
-          const MapEntry(ThemeMode.light, 'Light mode'),
-          const MapEntry(ThemeMode.dark, 'Dark mode'),
+          const MapEntry(ThemeMode.system, 'Device Default'),
+          const MapEntry(ThemeMode.light, 'Light Mode'),
+          const MapEntry(ThemeMode.dark, 'Dark Mode'),
         ];
         return SafeArea(
           child: Padding(
@@ -87,6 +98,7 @@ class ProfileScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final auth = context.watch<AuthProvider>();
+    final theme = context.watch<ThemeProvider>();
     final user = auth.user;
     final secondaryText = AppColors.textSecondaryOf(context);
 
@@ -201,7 +213,7 @@ class ProfileScreen extends StatelessWidget {
                 _ProfileTile(
                   icon: Icons.palette_outlined,
                   title: 'Appearance',
-                  subtitle: 'Switch between light, dark, or system mode',
+                  subtitle: _themeLabel(theme.mode),
                   onTap: () => _showThemeSheet(context),
                 ),
               ],
