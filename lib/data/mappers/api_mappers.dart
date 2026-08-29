@@ -1,6 +1,7 @@
 import '../models/booking_model.dart';
 import '../models/payment_models.dart';
 import '../models/time_slot_model.dart';
+import '../models/tip_record_model.dart';
 import '../models/address_model.dart';
 import '../models/wallet_transaction_model.dart';
 import '../models/notification_model.dart';
@@ -251,6 +252,11 @@ class ApiMappers {
     final partnerName = partnerJson is Map
         ? partnerJson['businessName']?.toString()
         : null;
+    final staffJson = json['staffId'];
+    final staffId = staffJson is Map
+        ? staffJson['_id']?.toString() ?? staffJson['id']?.toString()
+        : json['staffId']?.toString();
+    final staffName = staffJson is Map ? staffJson['name']?.toString() : null;
     final address = partnerJson is Map
         ? partnerJson['address'] as Map<String, dynamic>?
         : null;
@@ -280,9 +286,31 @@ class ApiMappers {
       status: status,
       statusText: bookingStatusLabelFromApi(rawStatus),
       professionalName: partnerName,
+      staffId: staffId,
+      staffName: staffName,
       canReview: status == BookingStatus.completed,
       paymentMethod: PaymentMethodX.fromApi(json['paymentMethod']?.toString()),
       paymentStatus: json['paymentStatus']?.toString() ?? 'pending',
+      tipAmount: (json['tipAmount'] as num?)?.toDouble() ?? 0,
+    );
+  }
+
+  static TipRecordModel tipRecordFromJson(Map<String, dynamic> json) {
+    return TipRecordModel(
+      id: json['_id']?.toString() ?? '',
+      transactionId:
+          json['transactionId']?.toString() ?? json['_id']?.toString() ?? '',
+      amount:
+          (json['tipAmount'] as num?)?.toDouble() ??
+          (json['amount'] as num?)?.toDouble() ??
+          0,
+      createdAt:
+          DateTime.tryParse(
+            json['createdAt']?.toString() ?? json['date']?.toString() ?? '',
+          ) ??
+          DateTime.now(),
+      description: json['description']?.toString() ?? 'Tip received',
+      type: json['type']?.toString() ?? 'direct_tip',
     );
   }
 

@@ -90,6 +90,7 @@ class ApiConstants {
 
   static String partnerSlots(String partnerId) => '/partners/$partnerId/slots';
   static String partnerDetail(String partnerId) => '/partners/$partnerId';
+  static String partnerTips(String partnerId) => '/partners/$partnerId/tips';
 
   static const Duration connectTimeout = Duration(seconds: 30);
 }

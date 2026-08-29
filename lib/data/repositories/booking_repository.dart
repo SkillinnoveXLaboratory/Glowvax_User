@@ -1,6 +1,7 @@
 import '../models/booking_model.dart';
 import '../models/payment_models.dart';
 import '../models/time_slot_model.dart';
+import '../models/tip_record_model.dart';
 
 abstract class BookingRepository {
   Future<List<BookingModel>> getBookings({bool forceRefresh = false});
@@ -24,6 +25,14 @@ abstract class BookingRepository {
     String timeSlot,
   );
   Future<void> requestRefund(String bookingId, String reason);
+  Future<List<TipRecordModel>> getPartnerTips(String partnerId);
+  Future<BookingModel> addTip({
+    required String partnerId,
+    required double amount,
+    String? bookingId,
+    String? staffId,
+    String? note,
+  });
   Future<List<TimeSlotModel>> getAvailableSlots(
     String partnerId,
     DateTime date,

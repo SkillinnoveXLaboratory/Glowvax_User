@@ -5,6 +5,7 @@ import '../../core/payment/razorpay_payment_service.dart';
 import '../../data/models/booking_model.dart';
 import '../../data/models/payment_models.dart';
 import '../../data/models/time_slot_model.dart';
+import '../../data/models/tip_record_model.dart';
 import '../../data/models/address_model.dart';
 import '../../data/models/service_model.dart';
 import '../../data/repositories/booking_repository.dart';
@@ -19,11 +20,14 @@ class BookingProvider extends ChangeNotifier {
   List<BookingModel> _bookings = [];
   List<AddressModel> _addresses = [];
   List<TimeSlotModel> _timeSlots = [];
+  List<TipRecordModel> _partnerTips = [];
   BookingModel? _selectedBooking;
   bool _isLoading = false;
   bool _hasLoaded = false;
   bool _isLoadingAddresses = false;
   bool _isLoadingSlots = false;
+  bool _isAddingTip = false;
+  bool _isLoadingPartnerTips = false;
   String? _bookingError;
 
   ServiceModel? _selectedService;
@@ -50,11 +54,14 @@ class BookingProvider extends ChangeNotifier {
       .toList();
   List<AddressModel> get addresses => _addresses;
   List<TimeSlotModel> get timeSlots => _timeSlots;
+  List<TipRecordModel> get partnerTips => _partnerTips;
   BookingModel? get selectedBooking => _selectedBooking;
   bool get isLoading => _isLoading;
   bool get hasLoaded => _hasLoaded;
   bool get isLoadingAddresses => _isLoadingAddresses;
   bool get isLoadingSlots => _isLoadingSlots;
+  bool get isAddingTip => _isAddingTip;
+  bool get isLoadingPartnerTips => _isLoadingPartnerTips;
   String? get bookingError => _bookingError;
 
   ServiceModel? get selectedService => _selectedService;
@@ -137,8 +144,27 @@ class BookingProvider extends ChangeNotifier {
     notifyListeners();
     try {
       _selectedBooking = await _bookingRepository.getBookingById(id);
+      final partnerId = _selectedBooking?.partnerId;
+      if (partnerId != null && partnerId.isNotEmpty) {
+        await loadPartnerTips(partnerId);
+      } else {
+        _partnerTips = [];
+      }
     } finally {
       _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> loadPartnerTips(String partnerId) async {
+    _isLoadingPartnerTips = true;
+    notifyListeners();
+    try {
+      _partnerTips = await _bookingRepository.getPartnerTips(partnerId);
+    } catch (_) {
+      _partnerTips = [];
+    } finally {
+      _isLoadingPartnerTips = false;
       notifyListeners();
     }
   }
@@ -337,13 +363,15 @@ class BookingProvider extends ChangeNotifier {
 
   String _paymentErrorMessage(Object e) {
     if (e is ApiException) {
-      if (e.code == 'SLOT_BOOKED')
+      if (e.code == 'SLOT_BOOKED') {
         return 'This slot was just booked. Please choose another time.';
+      }
       if (e.code == 'PAYMENT_VERIFICATION_FAILED') {
         return 'Payment could not be verified. Please contact support if money was deducted.';
       }
-      if (e.code == 'PAYMENT_GATEWAY_NOT_CONFIGURED')
+      if (e.code == 'PAYMENT_GATEWAY_NOT_CONFIGURED') {
         return 'Payments are temporarily unavailable.';
+      }
       return e.message;
     }
     return e.toString();
@@ -370,5 +398,40 @@ class BookingProvider extends ChangeNotifier {
   Future<void> requestRefund(String id, String reason) async {
     await _bookingRepository.requestRefund(id, reason);
     await loadBookingDetail(id);
+  }
+
+  Future<bool> addTip({
+    required BookingModel booking,
+    required double amount,
+    String? note,
+  }) async {
+    final partnerId = booking.partnerId;
+    if (partnerId == null || partnerId.isEmpty) {
+      _bookingError = 'Partner information is missing for this booking.';
+      notifyListeners();
+      return false;
+    }
+
+    _isAddingTip = true;
+    _bookingError = null;
+    notifyListeners();
+    try {
+      final updated = await _bookingRepository.addTip(
+        partnerId: partnerId,
+        bookingId: booking.id,
+        staffId: booking.staffId,
+        amount: amount,
+        note: note,
+      );
+      _selectedBooking = updated;
+      await loadBookings(forceRefresh: true);
+      return true;
+    } catch (e) {
+      _bookingError = _paymentErrorMessage(e);
+      return false;
+    } finally {
+      _isAddingTip = false;
+      notifyListeners();
+    }
   }
 }

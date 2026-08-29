@@ -256,6 +256,12 @@ class _BookingCard extends StatelessWidget {
                     label: 'Amount',
                     value: Formatters.currency(booking.amount),
                   ),
+                  if (booking.tipAmount > 0)
+                    _MetaPill(
+                      icon: Icons.volunteer_activism_outlined,
+                      label: 'Tip',
+                      value: Formatters.currency(booking.tipAmount),
+                    ),
                 ],
               ),
               const SizedBox(height: 14),

@@ -31,9 +31,12 @@ class BookingModel {
   final BookingStatus status;
   final String statusText;
   final String? professionalName;
+  final String? staffId;
+  final String? staffName;
   final bool canReview;
   final PaymentMethod paymentMethod;
   final String paymentStatus;
+  final double tipAmount;
 
   const BookingModel({
     required this.id,
@@ -49,9 +52,12 @@ class BookingModel {
     required this.status,
     this.statusText = '',
     this.professionalName,
+    this.staffId,
+    this.staffName,
     this.canReview = false,
     this.paymentMethod = PaymentMethod.razorpay,
     this.paymentStatus = 'pending',
+    this.tipAmount = 0,
   });
 
   bool get isPaid => paymentStatus == 'paid';
@@ -60,6 +66,9 @@ class BookingModel {
       ? professionalName!.trim()
       : 'Glowvax Partner';
 
+  String? get staffDisplayName =>
+      staffName?.trim().isNotEmpty == true ? staffName!.trim() : null;
+
   String get paymentMethodLabel => paymentMethod.label;
 
   String get paymentStatusLabel {
@@ -67,6 +76,9 @@ class BookingModel {
     if (paymentMethod == PaymentMethod.cash) return 'Pay at salon';
     return 'Payment pending';
   }
+
+  bool get canAddTip =>
+      status == BookingStatus.completed && partnerId != null && tipAmount <= 0;
 
   String get bookingCode {
     final clean = id.trim();

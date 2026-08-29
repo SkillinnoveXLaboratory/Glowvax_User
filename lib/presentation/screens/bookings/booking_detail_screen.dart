@@ -11,8 +11,10 @@ import '../../../core/utils/app_icons.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../data/models/booking_model.dart';
 import '../../../data/models/payment_models.dart';
+import '../../../data/models/tip_record_model.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/booking_provider.dart';
+import '../../providers/wallet_provider.dart';
 import '../../widgets/common/app_button.dart';
 
 class BookingDetailScreen extends StatefulWidget {
@@ -85,6 +87,15 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
     if (mounted) Navigator.pop(context);
   }
 
+  Future<void> _showTipSheet(BookingModel booking) async {
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => _TipSheet(booking: booking),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<BookingProvider>();
@@ -135,6 +146,12 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                         'Address',
                         booking.addressLine,
                       ),
+                      if (booking.staffDisplayName != null)
+                        _DetailRow(
+                          Icons.badge_outlined,
+                          'Staff',
+                          booking.staffDisplayName!,
+                        ),
                     ],
                   ),
                   const SizedBox(height: 16),
@@ -156,8 +173,21 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                         'Status',
                         booking.paymentStatusLabel,
                       ),
+                      if (booking.tipAmount > 0)
+                        _DetailRow(
+                          Icons.volunteer_activism_outlined,
+                          'Tip',
+                          Formatters.currency(booking.tipAmount),
+                        ),
                     ],
                   ),
+                  if (booking.status == BookingStatus.completed) ...[
+                    const SizedBox(height: 16),
+                    _PartnerTipsSection(
+                      isLoading: provider.isLoadingPartnerTips,
+                      tips: provider.partnerTips,
+                    ),
+                  ],
                   const SizedBox(height: 20),
                   if (booking.status == BookingStatus.upcoming) ...[
                     if (!booking.isPaid &&
@@ -209,6 +239,13 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                     ),
                   ],
                   if (booking.status == BookingStatus.completed) ...[
+                    if (booking.canAddTip) ...[
+                      AppButton(
+                        label: 'Add Tip',
+                        onPressed: () => _showTipSheet(booking),
+                      ),
+                      const SizedBox(height: 12),
+                    ],
                     AppButton(
                       label: 'Write a Review',
                       onPressed: () => Navigator.pushNamed(
@@ -251,6 +288,340 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                 ],
               ),
             ),
+    );
+  }
+}
+
+class _TipSheet extends StatefulWidget {
+  final BookingModel booking;
+
+  const _TipSheet({required this.booking});
+
+  @override
+  State<_TipSheet> createState() => _TipSheetState();
+}
+
+class _TipSheetState extends State<_TipSheet> {
+  static const List<double> _quickAmounts = [20, 50, 100];
+  final TextEditingController _customAmountController = TextEditingController();
+  final TextEditingController _noteController = TextEditingController();
+  double? _selectedAmount = 50;
+  bool _isCustom = false;
+
+  @override
+  void dispose() {
+    _customAmountController.dispose();
+    _noteController.dispose();
+    super.dispose();
+  }
+
+  double? get _resolvedAmount {
+    if (_isCustom) {
+      return double.tryParse(_customAmountController.text.trim());
+    }
+    return _selectedAmount;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final bookingProvider = context.watch<BookingProvider>();
+    final wallet = context.watch<WalletProvider>();
+    final bottomInset = MediaQuery.of(context).viewInsets.bottom;
+    final amount = _resolvedAmount;
+    final canSubmit =
+        amount != null && amount > 0 && !bookingProvider.isAddingTip;
+
+    return Padding(
+      padding: EdgeInsets.fromLTRB(16, 16, 16, bottomInset + 16),
+      child: Material(
+        color: AppColors.surfaceOf(context),
+        borderRadius: BorderRadius.circular(28),
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(
+                  child: Container(
+                    width: 44,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: AppColors.cardBorderOf(context),
+                      borderRadius: BorderRadius.circular(999),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 18),
+                Text(
+                  'Add Tip',
+                  style: AppTextStyles.headlineMedium.copyWith(
+                    color: AppColors.textPrimaryOf(context),
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  'Thank ${widget.booking.partnerDisplayName} for the completed service.',
+                  style: AppTextStyles.bodyMedium.copyWith(
+                    color: AppColors.textSecondaryOf(context),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Wrap(
+                  spacing: 10,
+                  runSpacing: 10,
+                  children: [
+                    for (final quick in _quickAmounts)
+                      _TipAmountChip(
+                        label: '\u20B9${quick.toStringAsFixed(0)}',
+                        selected: !_isCustom && _selectedAmount == quick,
+                        onTap: () => setState(() {
+                          _isCustom = false;
+                          _selectedAmount = quick;
+                        }),
+                      ),
+                    _TipAmountChip(
+                      label: 'Custom',
+                      selected: _isCustom,
+                      onTap: () => setState(() => _isCustom = true),
+                    ),
+                  ],
+                ),
+                if (_isCustom) ...[
+                  const SizedBox(height: 14),
+                  TextField(
+                    controller: _customAmountController,
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
+                    style: AppTextStyles.bodyLarge.copyWith(
+                      color: AppColors.textPrimaryOf(context),
+                    ),
+                    decoration: const InputDecoration(
+                      labelText: 'Custom tip amount',
+                      prefixText: '\u20B9 ',
+                    ),
+                    onChanged: (_) => setState(() {}),
+                  ),
+                ],
+                const SizedBox(height: 14),
+                TextField(
+                  controller: _noteController,
+                  textCapitalization: TextCapitalization.sentences,
+                  maxLines: 3,
+                  minLines: 2,
+                  style: AppTextStyles.bodyLarge.copyWith(
+                    color: AppColors.textPrimaryOf(context),
+                  ),
+                  decoration: const InputDecoration(
+                    labelText: 'Tip note',
+                    hintText: 'Optional note for the salon',
+                  ),
+                ),
+                const SizedBox(height: 14),
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    color: AppColors.surfaceElevatedOf(context),
+                    borderRadius: BorderRadius.circular(18),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Payment method',
+                        style: AppTextStyles.labelLarge.copyWith(
+                          color: AppColors.textSecondaryOf(context),
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Glowvax Wallet',
+                        style: AppTextStyles.titleMedium.copyWith(
+                          color: AppColors.textPrimaryOf(context),
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Available balance: ${Formatters.currency(wallet.balance)}',
+                        style: AppTextStyles.bodySmall.copyWith(
+                          color: AppColors.textSecondaryOf(context),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                if (bookingProvider.bookingError != null) ...[
+                  const SizedBox(height: 12),
+                  Text(
+                    bookingProvider.bookingError!,
+                    style: AppTextStyles.bodySmall.copyWith(
+                      color: AppColors.error,
+                    ),
+                  ),
+                ],
+                const SizedBox(height: 18),
+                AppButton(
+                  label: amount != null
+                      ? 'Confirm ${Formatters.currency(amount)} Tip'
+                      : 'Confirm Tip',
+                  isLoading: bookingProvider.isAddingTip,
+                  onPressed: canSubmit
+                      ? () async {
+                          final success = await bookingProvider.addTip(
+                            booking: widget.booking,
+                            amount: amount,
+                            note: _noteController.text,
+                          );
+                          if (!context.mounted) return;
+                          if (success) {
+                            await context.read<WalletProvider>().loadWallet();
+                            if (!context.mounted) return;
+                            Navigator.pop(context);
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Tip added successfully'),
+                                backgroundColor: AppColors.success,
+                              ),
+                            );
+                          }
+                        }
+                      : null,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _PartnerTipsSection extends StatelessWidget {
+  final bool isLoading;
+  final List<TipRecordModel> tips;
+
+  const _PartnerTipsSection({required this.isLoading, required this.tips});
+
+  @override
+  Widget build(BuildContext context) {
+    return _SectionCard(
+      title: 'Salon Tips',
+      children: [
+        if (isLoading)
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: 8),
+            child: Center(
+              child: CircularProgressIndicator(color: AppColors.primary),
+            ),
+          )
+        else if (tips.isEmpty)
+          Text(
+            'No tip records available yet for this salon.',
+            style: AppTextStyles.bodyMedium.copyWith(
+              color: AppColors.textSecondaryOf(context),
+            ),
+          )
+        else
+          ...tips
+              .take(3)
+              .map(
+                (tip) => Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        width: 40,
+                        height: 40,
+                        decoration: BoxDecoration(
+                          color: AppColors.primary.withValues(alpha: 0.12),
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                        child: const Icon(
+                          Icons.volunteer_activism_outlined,
+                          color: AppColors.primary,
+                          size: 20,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              Formatters.currency(tip.amount),
+                              style: AppTextStyles.titleMedium.copyWith(
+                                color: AppColors.textPrimaryOf(context),
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              tip.description,
+                              style: AppTextStyles.bodySmall.copyWith(
+                                color: AppColors.textSecondaryOf(context),
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              Formatters.date(tip.createdAt),
+                              style: AppTextStyles.labelMedium.copyWith(
+                                color: AppColors.textSecondaryOf(context),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+      ],
+    );
+  }
+}
+
+class _TipAmountChip extends StatelessWidget {
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  const _TipAmountChip({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(999),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        decoration: BoxDecoration(
+          color: selected
+              ? AppColors.primary.withValues(alpha: 0.12)
+              : AppColors.surfaceElevatedOf(context),
+          borderRadius: BorderRadius.circular(999),
+          border: Border.all(
+            color: selected
+                ? AppColors.primary
+                : AppColors.cardBorderOf(context),
+          ),
+        ),
+        child: Text(
+          label,
+          style: AppTextStyles.labelLarge.copyWith(
+            color: selected
+                ? AppColors.primary
+                : AppColors.textPrimaryOf(context),
+          ),
+        ),
+      ),
     );
   }
 }

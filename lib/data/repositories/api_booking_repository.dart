@@ -5,6 +5,7 @@ import '../mappers/api_mappers.dart';
 import '../models/booking_model.dart';
 import '../models/payment_models.dart';
 import '../models/time_slot_model.dart';
+import '../models/tip_record_model.dart';
 import 'booking_repository.dart';
 
 class ApiBookingRepository implements BookingRepository {
@@ -171,6 +172,45 @@ class ApiBookingRepository implements BookingRepository {
       body: {'reason': reason},
       auth: true,
     );
+  }
+
+  @override
+  Future<List<TipRecordModel>> getPartnerTips(String partnerId) async {
+    final response = await _client.get(
+      ApiConstants.partnerTips(partnerId),
+      auth: true,
+    );
+    return ApiMappers.parseList(response['data'], ApiMappers.tipRecordFromJson);
+  }
+
+  @override
+  Future<BookingModel> addTip({
+    required String partnerId,
+    required double amount,
+    String? bookingId,
+    String? staffId,
+    String? note,
+  }) async {
+    final response = await _client.post(
+      ApiConstants.partnerTips(partnerId),
+      body: {
+        'amount': amount,
+        if (bookingId != null && bookingId.isNotEmpty) 'bookingId': bookingId,
+        if (staffId != null && staffId.isNotEmpty) 'staffId': staffId,
+        if (note != null && note.trim().isNotEmpty) 'note': note.trim(),
+      },
+      auth: true,
+    );
+    final data = response['data'] as Map<String, dynamic>? ?? {};
+    final bookingJson = data['booking'] as Map<String, dynamic>?;
+    if (bookingJson != null) {
+      return ApiMappers.bookingFromJson(bookingJson);
+    }
+    if (bookingId != null && bookingId.isNotEmpty) {
+      final refreshed = await getBookingById(bookingId);
+      if (refreshed != null) return refreshed;
+    }
+    throw Exception('Tip added, but booking refresh failed');
   }
 
   @override
